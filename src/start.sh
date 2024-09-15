@@ -4,13 +4,18 @@
 sysctl -w user.max_user_namespaces=10000
 
 # Run balena base image entrypoint script
-/usr/bin/entry.sh echo "Running balena base image entrypoint..."
+#/usr/bin/entry.sh echo "Running balena base image entrypoint..."
 
 export DBUS_SYSTEM_BUS_ADDRESS=unix:path=/host/run/dbus/system_bus_socket
 
 sed -i -e 's/console/anybody/g' /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
-dpkg-reconfigure xserver-xorg-legacy
+dpkg-reconfigure -f noninteractive xserver-xorg-legacy
+
+# Start dbus and udev
+mkdir /run/udev
+service udev start
+service dbus start
 
 echo "balenaLabs browser version: $(<VERSION)"
 
@@ -68,4 +73,4 @@ environment="${environment::-1}"
 
 # launch Chromium and whitelist the enVars so that they pass through to the su session
 su -w $environment -c "export DISPLAY=:$DISPLAY_NUM && startx /usr/src/app/startx.sh $CURSOR" - chromium
-balena-idle
+#trap : TERM INT; sleep infinity & wait
