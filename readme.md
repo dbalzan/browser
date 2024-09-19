@@ -92,6 +92,7 @@ The following environment variables allow configuration of the `browser` block:
 |`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
 |`API_PORT`|port number|5011|Specifies the port number the API runs on|
 |`REMOTE_DEBUG_PORT`|port number|35173|Specifies the port number the chrome remote debugger runs on|
+|`DEFAULT_ZOOM_LEVEL`|`n`|`3.8017840169239308`|Specifies a default zoom level using a strange chrome factor
 
 ---
 

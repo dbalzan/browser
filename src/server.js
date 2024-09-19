@@ -1,17 +1,14 @@
 #!/bin/env node
 
-const express = require('express');
-const bodyParser = require('body-parser');
-const chromeLauncher = require('chrome-launcher');
-const bent = require('bent')
-const {
-  setIntervalAsync,
-  clearIntervalAsync
-} = require('set-interval-async/dynamic')
-const { spawn } = require('child_process');
-const { readFile, unlink } = require('fs').promises;
-const path = require('path');
-const os = require('os');
+import express from 'express';
+import bodyParser from 'body-parser';
+import * as chromeLauncher from 'chrome-launcher';
+import bent from 'bent';
+import { setIntervalAsync, clearIntervalAsync } from 'set-interval-async/dynamic';
+import { spawn } from 'child_process';
+import { readFile, unlink } from 'fs/promises';
+import path from 'path';
+import os from 'os';
 
 // Bring in the static environment variables
 const API_PORT = parseInt(process.env.API_PORT) || 5011;
@@ -21,6 +18,7 @@ const PERSISTENT_DATA = process.env.PERSISTENT || '0';
 const REMOTE_DEBUG_PORT = process.env.REMOTE_DEBUG_PORT || 35173;
 const FLAGS = process.env.FLAGS || null;
 const EXTRA_FLAGS = process.env.EXTRA_FLAGS || null;
+const DEFAULT_ZOOM_LEVEL = process.env.DEFAULT_ZOOM_LEVEL || "1.0";
 const HTTPS_REGEX = /^https?:\/\//i //regex for HTTP/S prefix
 
 // Environment variables which can be overriden from the API
@@ -33,6 +31,15 @@ let flags = [];
 
 // Refresh timer object
 let timer = {};
+
+// Default zoom level preferences
+const prefs = {
+  "partition": {
+    "default_zoom_level": {
+      "x": parseFloat(DEFAULT_ZOOM_LEVEL)
+    }
+  }
+};
 
 // Returns the URL to display, adhering to the hieracrchy:
 // 1) the configured LAUNCH_URL
@@ -160,12 +167,14 @@ let launchChromium = async function(url) {
     }
 
     console.log(`Starting Chromium with flags: ${flags}`);
+    console.log(`Setting preferences:`, prefs);
     console.log(`Displaying URL: ${startingUrl}`);
 
     const chrome = await chromeLauncher.launch({
       startingUrl: startingUrl,
       ignoreDefaultFlags: true,
       chromeFlags: flags,
+      prefs: prefs,
       port: REMOTE_DEBUG_PORT,
       connectionPollInterval: 1000,
       maxConnectionRetries: 120,
